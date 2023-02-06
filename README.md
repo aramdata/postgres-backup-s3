@@ -22,8 +22,9 @@ services:
       S3_SECRET_ACCESS_KEY: secret
       S3_BUCKET: my-bucket
       S3_PREFIX: backup
+      S3_ENDPOINT: if your s3 storage is not on aws
       POSTGRES_HOST: postgres
-      POSTGRES_DATABASE: dbname
+      POSTGRES_DATABASES: 'dbname1,dbname2,dbname3,...'
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
 ```
