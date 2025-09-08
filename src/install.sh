@@ -3,15 +3,8 @@
 set -eux
 set -o pipefail
 
-apk update
-
-# install pg_dump
-apk add postgresql-client
-
-# install gpg
-apk add gnupg
-
-apk add aws-cli
+apk add --no-cache gnupg
+apk add --no-cache aws-cli
 
 # install go-cron
 apk add curl
