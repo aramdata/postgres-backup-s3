@@ -19,6 +19,8 @@ jobs:
           # - { postgres: 16, alpine: '3.19' }
           - { postgres: 17}
           - { postgres: 17.6}
+          - { postgres: 18.1}
+
 
 
     steps:
