@@ -24,7 +24,8 @@ services:
       S3_PREFIX: backup
       S3_ENDPOINT: if your s3 storage is not on aws
       POSTGRES_HOST: postgres
-      POSTGRES_DATABASES: 'dbname1,dbname2,dbname3,...'
+      POSTGRES_DATABASES: 'dbname1,dbname2,dbname3,...'  # optional if POSTGRES_DATABASES_AUTODISCOVER is enabled
+      POSTGRES_DATABASES_AUTODISCOVER: 'true'  # optional, set to 'true' or '1' to auto-discover databases
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
 ```
@@ -35,6 +36,7 @@ services:
 - Run `docker exec <container name> sh backup.sh` to trigger a backup ad-hoc.
 - If `BACKUP_KEEP_DAYS` is set, backups older than this many days will be deleted from S3.
 - Set `S3_ENDPOINT` if you're using a non-AWS S3-compatible storage provider.
+- Set `POSTGRES_DATABASES_AUTODISCOVER` to `true` or `1` to automatically discover and backup all non-template databases from PostgreSQL. When enabled, `POSTGRES_DATABASES` is optional and will be ignored.
 
 ## Restore
 > **WARNING:** DATA LOSS! All database objects will be dropped and re-created.

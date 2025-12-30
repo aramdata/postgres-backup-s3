@@ -3,9 +3,47 @@ if [ -z "$S3_BUCKET" ]; then
   exit 1
 fi
 
-if [ -z "$POSTGRES_DATABASES" ]; then
-  echo "You need to set the POSTGRES_DATABASES environment variable."
-  exit 1
+# Check if autodiscover is enabled
+if [ -n "$POSTGRES_DATABASES_AUTODISCOVER" ] && ([ "$POSTGRES_DATABASES_AUTODISCOVER" = "true" ] || [ "$POSTGRES_DATABASES_AUTODISCOVER" = "1" ]); then
+  # Autodiscover databases from PostgreSQL
+  if [ -z "$POSTGRES_HOST" ]; then
+    # https://docs.docker.com/network/links/#environment-variables
+    if [ -n "$POSTGRES_PORT_5432_TCP_ADDR" ]; then
+      POSTGRES_HOST=$POSTGRES_PORT_5432_TCP_ADDR
+      POSTGRES_PORT=$POSTGRES_PORT_5432_TCP_PORT
+    else
+      echo "You need to set the POSTGRES_HOST environment variable for autodiscovery."
+      exit 1
+    fi
+  fi
+
+  if [ -z "$POSTGRES_USER" ]; then
+    echo "You need to set the POSTGRES_USER environment variable for autodiscovery."
+    exit 1
+  fi
+
+  if [ -z "$POSTGRES_PASSWORD" ]; then
+    echo "You need to set the POSTGRES_PASSWORD environment variable for autodiscovery."
+    exit 1
+  fi
+
+  export PGPASSWORD=$POSTGRES_PASSWORD
+  
+  echo "Autodiscovering databases from PostgreSQL..."
+  POSTGRES_DATABASES=$(psql -h "$POSTGRES_HOST" -p "${POSTGRES_PORT:-5432}" -U "$POSTGRES_USER" -t -c "SELECT datname FROM pg_database WHERE datistemplate = false ORDER BY datname;" | tr '\n' ',' | sed 's/,$//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/,[[:space:]]*/,/g')
+  
+  if [ -z "$POSTGRES_DATABASES" ]; then
+    echo "No databases found for backup."
+    exit 1
+  fi
+  
+  echo "Discovered databases: $POSTGRES_DATABASES"
+else
+  # Use manually specified databases
+  if [ -z "$POSTGRES_DATABASES" ]; then
+    echo "You need to set the POSTGRES_DATABASES environment variable."
+    exit 1
+  fi
 fi
 
 if [ -z "$POSTGRES_HOST" ]; then
